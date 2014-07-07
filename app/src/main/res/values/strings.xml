@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">CarParks</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_map">Map</string>
+    <string name="carparks_feed">http://open311server.herokuapp.com/dev/v1/facilities/parking.xml</string>
+    <string name="title_activity_maps">Map</string>
+
+</resources>
