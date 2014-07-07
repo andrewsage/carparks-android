@@ -67,10 +67,10 @@ public class MapsActivity extends FragmentActivity {
         //mMap.addMarker(new MarkerOptions().position(new LatLng(57.148624, -2.1006504)).title("Car Park"));
 
         Intent intent = getIntent();
-        Location location = intent.getParcelableExtra(MainActivity.EXTRA_CARPARK_LOCATION);
-        String name = intent.getStringExtra(MainActivity.EXTRA_CARPARK_NAME);
+        LatLng latLng = intent.getParcelableExtra(MainActivity.EXTRA_CARPARK_LOCATION);
 
-        drawMarker(new LatLng(location.getLatitude(), location.getLongitude()), name);
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,
+                16));
     }
 
 

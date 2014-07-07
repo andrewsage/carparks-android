@@ -7,8 +7,12 @@ import android.location.Location;
  */
 public class CarPark {
 
+    private String carParkID;
     private String name;
     private Location location;
+
+    public String getCarParkID() { return carParkID; }
+    public void setCarParkID(String carParkID) { this.carParkID = carParkID; }
 
     public String getName() {
         return name;
@@ -20,10 +24,11 @@ public class CarPark {
     public Location getLocation() { return location; }
     public void setLocation(Location location) { this.location = location; }
 
-    public CarPark(String name, Location location) {
+    public CarPark(String name, Location location, String id) {
 
         this.name = name;
         this.location = location;
+        this.carParkID = id;
     }
 
     @Override

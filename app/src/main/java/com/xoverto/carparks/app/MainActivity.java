@@ -14,6 +14,8 @@ import android.view.ViewGroup;
 import android.os.Build;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.model.LatLng;
+
 
 public class MainActivity extends ActionBarActivity implements CarParkFragment.OnFragmentInteractionListener {
 
@@ -60,10 +62,9 @@ public class MainActivity extends ActionBarActivity implements CarParkFragment.O
 
 
     @Override
-    public void onFragmentInteraction(CarPark carPark) {
+    public void onFragmentInteraction(LatLng latLng) {
         Intent intent = new Intent(this, MapsActivity.class);
-        intent.putExtra(EXTRA_CARPARK_LOCATION, carPark.getLocation());
-        intent.putExtra(EXTRA_CARPARK_NAME, carPark.getName());
+        intent.putExtra(EXTRA_CARPARK_LOCATION, latLng);
         startActivity(intent);
     }
 }

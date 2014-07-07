@@ -1,8 +1,11 @@
 package com.xoverto.carparks.app;
 
 import android.app.Activity;
+import android.app.LoaderManager;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.CursorLoader;
+import android.content.Loader;
 import android.database.Cursor;
 import android.location.Location;
 import android.os.Bundle;
@@ -16,10 +19,12 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.google.android.gms.maps.model.LatLng;
 import com.xoverto.carparks.app.dummy.DummyContent;
 
 import org.w3c.dom.Document;
@@ -50,7 +55,7 @@ import javax.xml.parsers.ParserConfigurationException;
  * Activities containing this fragment MUST implement the Callbacks
  * interface.
  */
-public class CarParkFragment extends Fragment implements AbsListView.OnItemClickListener {
+public class CarParkFragment extends Fragment implements AbsListView.OnItemClickListener, LoaderManager.LoaderCallbacks<Cursor>  {
 
     private static final String TAG = "CARPARKS";
     private Handler handler = new Handler();
@@ -59,6 +64,8 @@ public class CarParkFragment extends Fragment implements AbsListView.OnItemClick
 
     private OnFragmentInteractionListener mListener;
 
+
+    private SimpleCursorAdapter mCursorAdapter;
     /**
      * The fragment's ListView/GridView.
      */
@@ -99,19 +106,19 @@ public class CarParkFragment extends Fragment implements AbsListView.OnItemClick
         View view = inflater.inflate(R.layout.fragment_carpark, container, false);
 
         // Set the adapter
+        mCursorAdapter = new SimpleCursorAdapter(getActivity(),
+                android.R.layout.simple_list_item_2,
+                null,
+                new String[] { CarParkProvider.KEY_NAME, CarParkProvider.KEY_CAR_PARK_ID, CarParkProvider.KEY_LOCATION_LAT, CarParkProvider.KEY_LOCATION_LNG},
+                new int[] { android.R.id.text1, android.R.id.text2}, 0);
+
         mListView = (AbsListView) view.findViewById(android.R.id.list);
-        ((AdapterView<ListAdapter>) mListView).setAdapter(mAdapter);
+        ((AdapterView<ListAdapter>) mListView).setAdapter(mCursorAdapter);
 
         // Set OnItemClickListener so we can be notified on item clicks
         mListView.setOnItemClickListener(this);
 
-        return view;
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
+        getLoaderManager().initLoader(0, null, this);
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -120,6 +127,16 @@ public class CarParkFragment extends Fragment implements AbsListView.OnItemClick
         });
 
         t.start();
+
+
+        return view;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+
     }
 
     @Override
@@ -139,15 +156,53 @@ public class CarParkFragment extends Fragment implements AbsListView.OnItemClick
         mListener = null;
     }
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        String[] projection = {
+                CarParkProvider.KEY_ID,
+                CarParkProvider.KEY_NAME,
+                CarParkProvider.KEY_CAR_PARK_ID,
+                CarParkProvider.KEY_LOCATION_LAT,
+                CarParkProvider.KEY_LOCATION_LNG
+        };
+        CursorLoader loader = new CursorLoader(getActivity(),
+                CarParkProvider.CONTENT_URI,
+                projection, null, null, null);
+
+        return loader;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        mCursorAdapter.swapCursor(cursor);
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mCursorAdapter.swapCursor(null);
+    }
+
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-        CarPark carPark = (CarPark) mCarParkList.get(position);
+        Cursor cursor = (Cursor)mCursorAdapter.getItem(position);
+        String value = cursor.getString(cursor
+                .getColumnIndex(CarParkProvider.KEY_NAME));
+        double lat = cursor.getDouble(cursor.getColumnIndex(CarParkProvider.KEY_LOCATION_LAT));
+        double lng = cursor.getDouble(cursor.getColumnIndex(CarParkProvider.KEY_LOCATION_LNG));
+
+        LatLng carParkLatLng = new LatLng(lat, lng);
+
+
+        Toast.makeText(parent.getContext(), value, Toast.LENGTH_SHORT).show();
+
+        //CarPark carPark = (CarPark) mCarParkList.get(position);
         if (null != mListener) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
-            mListener.onFragmentInteraction(carPark);
+            mListener.onFragmentInteraction(carParkLatLng);
         }
     }
 
@@ -176,10 +231,18 @@ public class CarParkFragment extends Fragment implements AbsListView.OnItemClick
     */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onFragmentInteraction(CarPark carPark);
+        public void onFragmentInteraction(LatLng latLng);
     }
 
     public void refreshCarParks() {
+
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                getLoaderManager().restartLoader(0, null, CarParkFragment.this);
+            }
+        });
+
         // Get the XML
         URL url;
         try {
@@ -206,11 +269,12 @@ public class CarParkFragment extends Fragment implements AbsListView.OnItemClick
                     for(int i = 0; i < nl.getLength(); i++) {
                         Element entry = (Element)nl.item(i);
                         Element facilityName = (Element)entry.getElementsByTagName("facility_name").item(0);
+                        Element carParkID = (Element)entry.getElementsByTagName("id").item(0);
                         Element latPositionElement = (Element)entry.getElementsByTagName("lat").item(0);
                         Element longPositionElement = (Element)entry.getElementsByTagName("long").item(0);
 
                         String name = facilityName.getFirstChild().getNodeValue();
-                        Log.d(TAG, "name : " + name);
+                        String id = carParkID.getFirstChild().getNodeValue();
                         Double latPosition = 0.0;
                         Double longPosition = 0.0;
 
@@ -218,17 +282,14 @@ public class CarParkFragment extends Fragment implements AbsListView.OnItemClick
                             latPosition = Double.parseDouble(latPositionElement.getFirstChild().getNodeValue());
                             longPosition = Double.parseDouble(longPositionElement.getFirstChild().getNodeValue());
                         } catch (NullPointerException e) {
-                            Log.d(TAG, "Location parsing exception.", e);
+                            Log.d(TAG, "Location parsing exception for " + name, e);
                         }
-
-                        Log.d(TAG, "lat " + latPosition.toString());
-                        Log.d(TAG, "long " + longPosition.toString());
 
                         Location location = new Location("dummyGPS");
                         location.setLatitude(latPosition);
                         location.setLongitude(longPosition);
 
-                        final CarPark carPark = new CarPark(name, location);
+                        final CarPark carPark = new CarPark(name, location, id);
 
                         handler.post(new Runnable() {
                             @Override
@@ -256,19 +317,20 @@ public class CarParkFragment extends Fragment implements AbsListView.OnItemClick
 
     private void addNewCarPark(CarPark carPark) {
 
-        mCarParkList.add(carPark);
-        mAdapter.notifyDataSetChanged();
+        //mCarParkList.add(carPark);
+        //mAdapter.notifyDataSetChanged();
 
-        /*
+
         ContentResolver cr = getActivity().getContentResolver();
 
         // Construct a where clause to make sure we don't already have this carpark in the provider
-        String w = CarParkProvider.KEY_NAME + " = " + carPark.getName();
+        String w = CarParkProvider.KEY_NAME + " = '" + carPark.getName() + "'";
 
         // If the carpark is new, insert it into the provider
         Cursor query = cr.query(CarParkProvider.CONTENT_URI, null, w, null, null);
         if(query.getCount() == 0) {
             ContentValues values = new ContentValues();
+            values.put(CarParkProvider.KEY_CAR_PARK_ID, carPark.getCarParkID());
             values.put(CarParkProvider.KEY_NAME, carPark.getName());
 
             double lat = carPark.getLocation().getLatitude();
@@ -279,7 +341,6 @@ public class CarParkFragment extends Fragment implements AbsListView.OnItemClick
             cr.insert(CarParkProvider.CONTENT_URI, values);
         }
         query.close();
-        */
     }
 
 }

@@ -172,7 +172,7 @@ public class CarParkProvider extends ContentProvider {
         private static final int DATABASE_VERSION = 1;
         private static final String CAR_PARK_TABLE = "car_parks";
         private static final String DATABASE_CREATE = "create table " + CAR_PARK_TABLE + " ("
-                + KEY_ID + " integer primary key autoincreament, "
+                + KEY_ID + " integer primary key autoincrement, "
                 + KEY_CAR_PARK_ID + " TEXT,"
                 + KEY_NAME + " TEXT, "
                 + KEY_UPDATED + " INTEGER, "
