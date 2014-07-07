@@ -1,6 +1,10 @@
 package com.xoverto.carparks.app;
 
+import android.app.LoaderManager;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
+import android.database.Cursor;
 import android.location.Location;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -11,7 +15,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapsActivity extends FragmentActivity {
+public class MapsActivity extends FragmentActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
@@ -20,6 +24,8 @@ public class MapsActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         setUpMapIfNeeded();
+
+        getLoaderManager().initLoader(0, null, this);
     }
 
     @Override
@@ -69,21 +75,68 @@ public class MapsActivity extends FragmentActivity {
         Intent intent = getIntent();
         LatLng latLng = intent.getParcelableExtra(MainActivity.EXTRA_CARPARK_LOCATION);
 
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,
-                16));
+        if(latLng != null) {
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,
+                    16));
+        }
     }
 
 
     private void drawMarker(LatLng latLng, String name){
-        mMap.clear();
-
-// zoom to the current location
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,
-                16));
-
-// add a marker to the map indicating our current position
+        // add a marker to the map indicating our current position
         mMap.addMarker(new MarkerOptions()
                 .position(latLng)
                 .snippet("Lat:" + latLng.latitude + "Lng:"+ latLng.longitude).title(name));
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        String[] projection = {
+                CarParkProvider.KEY_ID,
+                CarParkProvider.KEY_NAME,
+                CarParkProvider.KEY_CAR_PARK_ID,
+                CarParkProvider.KEY_LOCATION_LAT,
+                CarParkProvider.KEY_LOCATION_LNG
+        };
+        CursorLoader loader = new CursorLoader(this,
+                CarParkProvider.CONTENT_URI,
+                projection, null, null, null);
+
+        return loader;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+
+        int locationCount = 0;
+        double lat = 0;
+        double lng = 0;
+        String name = "";
+
+        locationCount = cursor.getCount();
+        cursor.moveToFirst();
+
+        mMap.clear();
+
+
+        for(int i = 0; i < locationCount; i++) {
+            lat = cursor.getDouble(cursor.getColumnIndex(CarParkProvider.KEY_LOCATION_LAT));
+            lng = cursor.getDouble(cursor.getColumnIndex(CarParkProvider.KEY_LOCATION_LNG));
+            name = cursor.getString(cursor.getColumnIndex(CarParkProvider.KEY_NAME));
+
+            LatLng location = new LatLng(lat, lng);
+            drawMarker(location, name);
+
+
+
+
+            
+            cursor.moveToNext();
+        }
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
     }
 }
