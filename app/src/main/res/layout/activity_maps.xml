@@ -1,7 +1,43 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MapsActivity" >
+
+<RadioGroup
+    android:id="@+id/rg_views"
+    android:orientation="horizontal"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" >
+
+    <RadioButton
+        android:id="@+id/rb_normal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/str_rb_normal"
+        android:checked="true" />
+
+    <RadioButton
+        android:id="@+id/rb_satellite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/str_rb_satellite" />
+
+    <RadioButton
+        android:id="@+id/rb_terrain"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/str_rb_terrain" />
+
+</RadioGroup>
+
 <fragment xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_below="@id/rg_views"
     android:id="@+id/map"
     tools:context="com.xoverto.carparks.app.MapsActivity"
     android:name="com.google.android.gms.maps.SupportMapFragment"/>
+
+    </RelativeLayout>

@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.location.Location;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.widget.RadioGroup;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -26,6 +27,22 @@ public class MapsActivity extends FragmentActivity implements LoaderManager.Load
         setUpMapIfNeeded();
 
         getLoaderManager().initLoader(0, null, this);
+
+        RadioGroup rgViews = (RadioGroup) findViewById(R.id.rg_views);
+
+        rgViews.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                if(checkedId == R.id.rb_normal){
+                    mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                }else if(checkedId == R.id.rb_satellite){
+                    mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                }else if(checkedId == R.id.rb_terrain){
+                    mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                }
+            }
+        });
     }
 
     @Override

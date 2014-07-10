@@ -8,4 +8,8 @@
     <string name="carparks_feed">http://open311server.herokuapp.com/dev/v1/facilities/parking.xml</string>
     <string name="title_activity_maps">Map</string>
 
+    <string name="str_rb_normal">Normal</string>
+    <string name="str_rb_satellite">Satellite</string>
+    <string name="str_rb_terrain">Terrain</string>
+
 </resources>
