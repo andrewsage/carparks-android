@@ -339,6 +339,17 @@ public class CarParkFragment extends Fragment implements AbsListView.OnItemClick
             values.put(CarParkProvider.KEY_LOCATION_LNG, lng);
 
             cr.insert(CarParkProvider.CONTENT_URI, values);
+        } else {
+            ContentValues values = new ContentValues();
+            values.put(CarParkProvider.KEY_CAR_PARK_ID, carPark.getCarParkID());
+            values.put(CarParkProvider.KEY_NAME, carPark.getName());
+
+            double lat = carPark.getLocation().getLatitude();
+            double lng = carPark.getLocation().getLongitude();
+            values.put(CarParkProvider.KEY_LOCATION_LAT, lat);
+            values.put(CarParkProvider.KEY_LOCATION_LNG, lng);
+
+            cr.update(CarParkProvider.CONTENT_URI, values, w, null);
         }
         query.close();
     }
