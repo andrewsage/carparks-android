@@ -30,7 +30,8 @@
         </activity>
         <activity
             android:name="com.xoverto.carparks.app.MapsActivity"
-            android:label="@string/title_activity_maps" >
+            android:label="@string/title_activity_maps"
+            android:parentActivityName="com.xoverto.carparks.app.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.xoverto.carparks.app.MainActivity" />
