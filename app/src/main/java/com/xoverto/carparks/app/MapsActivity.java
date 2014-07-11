@@ -38,8 +38,10 @@ public class MapsActivity extends FragmentActivity implements LoaderManager.Load
 
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
-                if(checkedId == R.id.rb_normal){
+                if(checkedId == R.id.rb_normal) {
                     mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                }else if(checkedId == R.id.rb_hybrid) {
+                    mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
                 }else if(checkedId == R.id.rb_satellite){
                     mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
                 }else if(checkedId == R.id.rb_terrain){

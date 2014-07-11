@@ -18,6 +18,12 @@
         android:checked="true" />
 
     <RadioButton
+        android:id="@+id/rb_hybrid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/str_rb_hybrid" />
+
+    <RadioButton
         android:id="@+id/rb_satellite"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
