@@ -5,6 +5,7 @@ import android.app.LoaderManager;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.CursorLoader;
+import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.location.Location;
@@ -106,10 +107,10 @@ public class CarParkFragment extends Fragment implements AbsListView.OnItemClick
         View view = inflater.inflate(R.layout.fragment_carpark, container, false);
 
         // Set the adapter
-        mCursorAdapter = new SimpleCursorAdapter(getActivity(),
+        mCursorAdapter = new CarParkSimpleCursorAdapter(getActivity(),
                 android.R.layout.simple_list_item_2,
                 null,
-                new String[] { CarParkProvider.KEY_NAME, CarParkProvider.KEY_CAR_PARK_ID, CarParkProvider.KEY_LOCATION_LAT, CarParkProvider.KEY_LOCATION_LNG},
+                new String[] { CarParkProvider.KEY_NAME, CarParkProvider.KEY_UPDATED, CarParkProvider.KEY_CAR_PARK_ID, CarParkProvider.KEY_LOCATION_LAT, CarParkProvider.KEY_LOCATION_LNG},
                 new int[] { android.R.id.text1, android.R.id.text2}, 0);
 
         mListView = (AbsListView) view.findViewById(android.R.id.list);
@@ -119,15 +120,7 @@ public class CarParkFragment extends Fragment implements AbsListView.OnItemClick
         mListView.setOnItemClickListener(this);
 
         getLoaderManager().initLoader(0, null, this);
-        Thread t = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                refreshCarParks();
-            }
-        });
-
-        t.start();
-
+        refreshCarParks();
 
         return view;
     }
@@ -163,7 +156,8 @@ public class CarParkFragment extends Fragment implements AbsListView.OnItemClick
                 CarParkProvider.KEY_NAME,
                 CarParkProvider.KEY_CAR_PARK_ID,
                 CarParkProvider.KEY_LOCATION_LAT,
-                CarParkProvider.KEY_LOCATION_LNG
+                CarParkProvider.KEY_LOCATION_LNG,
+                CarParkProvider.KEY_UPDATED
         };
         CursorLoader loader = new CursorLoader(getActivity(),
                 CarParkProvider.CONTENT_URI,
@@ -236,122 +230,9 @@ public class CarParkFragment extends Fragment implements AbsListView.OnItemClick
 
     public void refreshCarParks() {
 
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                getLoaderManager().restartLoader(0, null, CarParkFragment.this);
-            }
-        });
+        getLoaderManager().restartLoader(0, null, CarParkFragment.this);
+        getActivity().startService(new Intent(getActivity(), CarParkUpdateService.class));
 
-        // Get the XML
-        URL url;
-        try {
-            String carParksFeed = getString(R.string.carparks_feed);
-            url = new URL(carParksFeed);
-
-            URLConnection connection;
-            connection = url.openConnection();
-
-            HttpURLConnection httpConnection = (HttpURLConnection)connection;
-            int responseCode = httpConnection.getResponseCode();
-            if(responseCode == HttpURLConnection.HTTP_OK) {
-                InputStream in = httpConnection.getInputStream();
-                DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-                DocumentBuilder db = dbf.newDocumentBuilder();
-                Document dom = db.parse(in);
-                Element docEle = dom.getDocumentElement();
-
-                mCarParkList.clear();
-
-                NodeList nl = docEle.getElementsByTagName("facility");
-
-                if(nl != null && nl.getLength() > 0) {
-                    for(int i = 0; i < nl.getLength(); i++) {
-                        Element entry = (Element)nl.item(i);
-                        Element facilityName = (Element)entry.getElementsByTagName("facility_name").item(0);
-                        Element carParkID = (Element)entry.getElementsByTagName("id").item(0);
-                        Element latPositionElement = (Element)entry.getElementsByTagName("lat").item(0);
-                        Element longPositionElement = (Element)entry.getElementsByTagName("long").item(0);
-
-                        String name = facilityName.getFirstChild().getNodeValue();
-                        String id = carParkID.getFirstChild().getNodeValue();
-                        Double latPosition = 0.0;
-                        Double longPosition = 0.0;
-
-                        try {
-                            latPosition = Double.parseDouble(latPositionElement.getFirstChild().getNodeValue());
-                            longPosition = Double.parseDouble(longPositionElement.getFirstChild().getNodeValue());
-                        } catch (NullPointerException e) {
-                            Log.d(TAG, "Location parsing exception for " + name, e);
-                        }
-
-                        Location location = new Location("dummyGPS");
-                        location.setLatitude(latPosition);
-                        location.setLongitude(longPosition);
-
-                        final CarPark carPark = new CarPark(name, location, id);
-
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                addNewCarPark(carPark);
-                            }
-                        });
-                    }
-                }
-
-            }
-
-        } catch (MalformedURLException e) {
-            Log.d(TAG, "MalformedURLException");
-        } catch (IOException e) {
-            Log.d(TAG, "IOException");
-        } catch (ParserConfigurationException e) {
-            Log.d(TAG, "Parser Configuration Exception");
-        } catch (SAXException e) {
-            Log.d(TAG, "SAX Exception");
-        } finally {
-
-        }
-    }
-
-    private void addNewCarPark(CarPark carPark) {
-
-        //mCarParkList.add(carPark);
-        //mAdapter.notifyDataSetChanged();
-
-
-        ContentResolver cr = getActivity().getContentResolver();
-
-        // Construct a where clause to make sure we don't already have this carpark in the provider
-        String w = CarParkProvider.KEY_NAME + " = '" + carPark.getName() + "'";
-
-        // If the carpark is new, insert it into the provider
-        Cursor query = cr.query(CarParkProvider.CONTENT_URI, null, w, null, null);
-        if(query.getCount() == 0) {
-            ContentValues values = new ContentValues();
-            values.put(CarParkProvider.KEY_CAR_PARK_ID, carPark.getCarParkID());
-            values.put(CarParkProvider.KEY_NAME, carPark.getName());
-
-            double lat = carPark.getLocation().getLatitude();
-            double lng = carPark.getLocation().getLongitude();
-            values.put(CarParkProvider.KEY_LOCATION_LAT, lat);
-            values.put(CarParkProvider.KEY_LOCATION_LNG, lng);
-
-            cr.insert(CarParkProvider.CONTENT_URI, values);
-        } else {
-            ContentValues values = new ContentValues();
-            values.put(CarParkProvider.KEY_CAR_PARK_ID, carPark.getCarParkID());
-            values.put(CarParkProvider.KEY_NAME, carPark.getName());
-
-            double lat = carPark.getLocation().getLatitude();
-            double lng = carPark.getLocation().getLongitude();
-            values.put(CarParkProvider.KEY_LOCATION_LAT, lat);
-            values.put(CarParkProvider.KEY_LOCATION_LNG, lng);
-
-            cr.update(CarParkProvider.CONTENT_URI, values, w, null);
-        }
-        query.close();
     }
 
 }

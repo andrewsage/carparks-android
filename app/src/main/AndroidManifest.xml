@@ -53,6 +53,18 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.xoverto.carparks.app.MainActivity" />
         </activity>
+
+        <service
+            android:name="com.xoverto.carparks.app.CarParkUpdateService"
+            android:enabled="true"
+            android:exported="true" >
+        </service>
+
+        <receiver android:name=".CarParkAlarmReceiver">
+            <intent-filter>
+                <action android:name="com.xoverto.carparks.app.ACTION_REFRESH_CARPARK" />
+            </intent-filter>
+        </receiver>
     </application>
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />

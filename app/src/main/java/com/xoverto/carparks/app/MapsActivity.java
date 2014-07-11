@@ -13,8 +13,12 @@ import android.widget.RadioGroup;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.text.DateFormat;
+import java.util.Date;
 
 public class MapsActivity extends FragmentActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -99,11 +103,13 @@ public class MapsActivity extends FragmentActivity implements LoaderManager.Load
     }
 
 
-    private void drawMarker(LatLng latLng, String name){
+    private void drawMarker(LatLng latLng, String name, String updated){
         // add a marker to the map indicating our current position
         mMap.addMarker(new MarkerOptions()
                 .position(latLng)
-                .snippet("Lat:" + latLng.latitude + "Lng:"+ latLng.longitude).title(name));
+                .snippet(updated)
+                .title(name)
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.carpark)));
     }
 
     @Override
@@ -113,7 +119,8 @@ public class MapsActivity extends FragmentActivity implements LoaderManager.Load
                 CarParkProvider.KEY_NAME,
                 CarParkProvider.KEY_CAR_PARK_ID,
                 CarParkProvider.KEY_LOCATION_LAT,
-                CarParkProvider.KEY_LOCATION_LNG
+                CarParkProvider.KEY_LOCATION_LNG,
+                CarParkProvider.KEY_UPDATED
         };
         CursorLoader loader = new CursorLoader(this,
                 CarParkProvider.CONTENT_URI,
@@ -128,6 +135,7 @@ public class MapsActivity extends FragmentActivity implements LoaderManager.Load
         int locationCount = 0;
         double lat = 0;
         double lng = 0;
+        long updated = 0;
         String name = "";
 
         locationCount = cursor.getCount();
@@ -140,14 +148,15 @@ public class MapsActivity extends FragmentActivity implements LoaderManager.Load
             lat = cursor.getDouble(cursor.getColumnIndex(CarParkProvider.KEY_LOCATION_LAT));
             lng = cursor.getDouble(cursor.getColumnIndex(CarParkProvider.KEY_LOCATION_LNG));
             name = cursor.getString(cursor.getColumnIndex(CarParkProvider.KEY_NAME));
+            updated = cursor.getLong(cursor.getColumnIndex(CarParkProvider.KEY_UPDATED));
 
             LatLng location = new LatLng(lat, lng);
-            drawMarker(location, name);
 
+            DateFormat dateF = DateFormat.getDateTimeInstance();
+            String text = "Last Updated: " + dateF.format(new Date(updated));
 
+            drawMarker(location, name, text);
 
-
-            
             cursor.moveToNext();
         }
 
