@@ -1,11 +1,14 @@
 package com.xoverto.carparks.app;
 
 import android.app.LoaderManager;
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.location.Criteria;
 import android.location.Location;
+import android.location.LocationManager;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.widget.RadioGroup;
@@ -98,10 +101,20 @@ public class MapsActivity extends FragmentActivity implements LoaderManager.Load
         Intent intent = getIntent();
         LatLng latLng = intent.getParcelableExtra(MainActivity.EXTRA_CARPARK_LOCATION);
 
-        if(latLng != null) {
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,
-                    16));
+
+        mMap.setMyLocationEnabled(true);
+
+        if(latLng == null) {
+            Criteria criteria = new Criteria();
+            LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            String provider = locationManager.getBestProvider(criteria, false);
+            Location location = locationManager.getLastKnownLocation(provider);
+            double lat =  location.getLatitude();
+            double lng = location.getLongitude();
+            latLng = new LatLng(lat, lng);
         }
+
+         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
     }
 
 
