@@ -111,11 +111,18 @@ public class CarParkUpdateService extends IntentService {
                         Element carParkID = (Element)entry.getElementsByTagName("id").item(0);
                         Element latPositionElement = (Element)entry.getElementsByTagName("lat").item(0);
                         Element longPositionElement = (Element)entry.getElementsByTagName("long").item(0);
+                        Element featuresElement = (Element)entry.getElementsByTagName("features").item(0);
+                        Element occupancyElement = (Element)featuresElement.getElementsByTagName("occupancy").item(0);
+                        Element occupancyPercentageElement = (Element)featuresElement.getElementsByTagName("occupancypercentage").item(0);
+
 
                         String name = facilityName.getFirstChild().getNodeValue();
                         String id = carParkID.getFirstChild().getNodeValue();
                         Double latPosition = 0.0;
                         Double longPosition = 0.0;
+                        Integer occupancy = Integer.parseInt(occupancyElement.getFirstChild().getNodeValue());
+                        Double occupancyPercentage = Double.parseDouble(occupancyPercentageElement.getFirstChild().getNodeValue());
+
 
                         try {
                             latPosition = Double.parseDouble(latPositionElement.getFirstChild().getNodeValue());
@@ -128,7 +135,7 @@ public class CarParkUpdateService extends IntentService {
                         location.setLatitude(latPosition);
                         location.setLongitude(longPosition);
 
-                        final CarPark carPark = new CarPark(name, location, id);
+                        final CarPark carPark = new CarPark(name, location, id, occupancy, occupancyPercentage);
                         addNewCarPark(carPark);
                     }
                 }
@@ -169,6 +176,9 @@ public class CarParkUpdateService extends IntentService {
             double lng = carPark.getLocation().getLongitude();
             values.put(CarParkProvider.KEY_LOCATION_LAT, lat);
             values.put(CarParkProvider.KEY_LOCATION_LNG, lng);
+            values.put(CarParkProvider.KEY_OCCUPANCY, carPark.getOccupancy());
+            values.put(CarParkProvider.KEY_OCCUPANCY_PERCENTAGE, carPark.getOccupancyPercentage());
+            values.put(CarParkProvider.KEY_SPACES, carPark.getSpaces());
 
             cr.insert(CarParkProvider.CONTENT_URI, values);
         } else {
@@ -181,6 +191,9 @@ public class CarParkUpdateService extends IntentService {
             values.put(CarParkProvider.KEY_LOCATION_LAT, lat);
             values.put(CarParkProvider.KEY_LOCATION_LNG, lng);
             values.put(CarParkProvider.KEY_UPDATED, java.lang.System.currentTimeMillis());
+            values.put(CarParkProvider.KEY_OCCUPANCY, carPark.getOccupancy());
+            values.put(CarParkProvider.KEY_OCCUPANCY_PERCENTAGE, carPark.getOccupancyPercentage());
+            values.put(CarParkProvider.KEY_SPACES, carPark.getSpaces());
 
             cr.update(CarParkProvider.CONTENT_URI, values, w, null);
         }

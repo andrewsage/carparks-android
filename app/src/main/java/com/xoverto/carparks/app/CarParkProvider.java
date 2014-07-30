@@ -29,6 +29,7 @@ public class CarParkProvider extends ContentProvider {
     public static final String KEY_LOCATION_LNG = "longitude";
     public static final String KEY_OCCUPANCY = "occupancy";
     public static final String KEY_OCCUPANCY_PERCENTAGE = "occupancy_percentage";
+    public static final String KEY_SPACES = "spaces";
 
     // Create the constants used to differentiate between the different URI requests
     private static final int CAR_PARKS = 1;
@@ -179,7 +180,8 @@ public class CarParkProvider extends ContentProvider {
                 + KEY_LOCATION_LAT + " FLOAT, "
                 + KEY_LOCATION_LNG + " FLOAT, "
                 + KEY_OCCUPANCY + " INTEGER, "
-                + KEY_OCCUPANCY_PERCENTAGE + " INTEGER);";
+                + KEY_OCCUPANCY_PERCENTAGE + " REAL, "
+                + KEY_SPACES + " INTEGER);";
 
         // The underlying database
         private SQLiteDatabase carParkDB;

@@ -8,6 +8,7 @@ import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -108,10 +109,32 @@ public class CarParkFragment extends Fragment implements AbsListView.OnItemClick
 
         // Set the adapter
         mCursorAdapter = new CarParkSimpleCursorAdapter(getActivity(),
-                android.R.layout.simple_list_item_2,
+                R.layout.carpark_list_item,
                 null,
-                new String[] { CarParkProvider.KEY_NAME, CarParkProvider.KEY_UPDATED, CarParkProvider.KEY_CAR_PARK_ID, CarParkProvider.KEY_LOCATION_LAT, CarParkProvider.KEY_LOCATION_LNG},
-                new int[] { android.R.id.text1, android.R.id.text2}, 0);
+                new String[] { CarParkProvider.KEY_NAME, CarParkProvider.KEY_UPDATED, CarParkProvider.KEY_OCCUPANCY},
+                new int[] { R.id.name, R.id.updated, R.id.occupancy}, 0);
+
+        mCursorAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
+            public boolean setViewValue(View view, Cursor cursor, int column) {
+
+                if (view.getId() == R.id.occupancy) {
+                    int occupancyPercentage = cursor.getInt(cursor.getColumnIndex(CarParkProvider.KEY_OCCUPANCY_PERCENTAGE));
+                    int spacesFree = cursor.getInt(cursor.getColumnIndex(CarParkProvider.KEY_SPACES));
+                    String label = String.format("%1$d spaces left", spacesFree);
+                    TextView text = (TextView)view.findViewById(R.id.occupancy);
+                    text.setText(label);
+                    if(occupancyPercentage > 80) {
+                        text.setTextColor(Color.rgb(255, 0, 0));
+                    } else {
+                        text.setTextColor(Color.rgb(0, 128, 0));
+                    }
+
+                    return true;
+                }
+
+                return false;
+            }
+        });
 
         mListView = (AbsListView) view.findViewById(android.R.id.list);
         ((AdapterView<ListAdapter>) mListView).setAdapter(mCursorAdapter);
@@ -157,6 +180,9 @@ public class CarParkFragment extends Fragment implements AbsListView.OnItemClick
                 CarParkProvider.KEY_CAR_PARK_ID,
                 CarParkProvider.KEY_LOCATION_LAT,
                 CarParkProvider.KEY_LOCATION_LNG,
+                CarParkProvider.KEY_OCCUPANCY,
+                CarParkProvider.KEY_OCCUPANCY_PERCENTAGE,
+                CarParkProvider.KEY_SPACES,
                 CarParkProvider.KEY_UPDATED
         };
         CursorLoader loader = new CursorLoader(getActivity(),

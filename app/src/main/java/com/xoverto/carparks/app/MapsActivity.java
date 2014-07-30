@@ -135,7 +135,8 @@ public class MapsActivity extends FragmentActivity implements LoaderManager.Load
                 CarParkProvider.KEY_CAR_PARK_ID,
                 CarParkProvider.KEY_LOCATION_LAT,
                 CarParkProvider.KEY_LOCATION_LNG,
-                CarParkProvider.KEY_UPDATED
+                CarParkProvider.KEY_UPDATED,
+                CarParkProvider.KEY_SPACES
         };
         CursorLoader loader = new CursorLoader(this,
                 CarParkProvider.CONTENT_URI,
@@ -151,6 +152,7 @@ public class MapsActivity extends FragmentActivity implements LoaderManager.Load
         double lat = 0;
         double lng = 0;
         long updated = 0;
+        int spaces = 0;
         String name = "";
 
         locationCount = cursor.getCount();
@@ -164,11 +166,12 @@ public class MapsActivity extends FragmentActivity implements LoaderManager.Load
             lng = cursor.getDouble(cursor.getColumnIndex(CarParkProvider.KEY_LOCATION_LNG));
             name = cursor.getString(cursor.getColumnIndex(CarParkProvider.KEY_NAME));
             updated = cursor.getLong(cursor.getColumnIndex(CarParkProvider.KEY_UPDATED));
+            spaces = cursor.getInt(cursor.getColumnIndex(CarParkProvider.KEY_SPACES));
 
             LatLng location = new LatLng(lat, lng);
 
             DateFormat dateF = DateFormat.getDateTimeInstance();
-            String text = "Last Updated: " + dateF.format(new Date(updated));
+            String text = spaces + " spaces as of " + dateF.format(new Date(updated));
 
             drawMarker(location, name, text);
 
