@@ -127,19 +127,8 @@ public class MainActivity extends ActionBarActivity implements CarParkFragment.O
 
     @Override
     public void onFragmentInteraction(LatLng latLng) {
-        MapFragment mapFragment =  (MapFragment)mAdapter.getItem(2);
-        mapFragment.mLatLong = latLng;
-        Bundle bundle = new Bundle();
-        bundle.putDouble(EXTRA_CARPARK_LOCATION_LAT, latLng.latitude);
-        bundle.putDouble(EXTRA_CARPARK_LOCATION_LONG, latLng.longitude);
-        mapFragment.setArguments(bundle);
-
-        viewPager.setCurrentItem(2);
-
-        /*
-        Intent intent = new Intent(this, MapsActivity.class);
+        Intent intent = new Intent(this, CarParkDetailsActivity.class);
         intent.putExtra(EXTRA_CARPARK_LOCATION, latLng);
         startActivity(intent);
-        */
     }
 }

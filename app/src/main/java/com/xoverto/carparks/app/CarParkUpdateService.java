@@ -16,13 +16,18 @@ import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -84,10 +89,7 @@ public class CarParkUpdateService extends IntentService {
     }
 
     public void refreshCarParks() {
-
-        // TODO: reinstate refreshCarParks
-/*
-        // Get the XML
+        // Get the JSON
         URL url;
         try {
             String carParksFeed = getString(R.string.carparks_feed);
@@ -100,70 +102,53 @@ public class CarParkUpdateService extends IntentService {
             int responseCode = httpConnection.getResponseCode();
             if(responseCode == HttpURLConnection.HTTP_OK) {
                 InputStream in = httpConnection.getInputStream();
-                DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-                DocumentBuilder db = dbf.newDocumentBuilder();
-                Document dom = db.parse(in);
-                Element docEle = dom.getDocumentElement();
+                BufferedReader streamReader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+                StringBuilder responseStrBuilder = new StringBuilder();
 
-                NodeList nl = docEle.getElementsByTagName("facility");
+                String inputStr;
+                while ((inputStr = streamReader.readLine()) != null)
+                    responseStrBuilder.append(inputStr);
 
-                if(nl != null && nl.getLength() > 0) {
-                    for(int i = 0; i < nl.getLength(); i++) {
-                        Element entry = (Element)nl.item(i);
-                        Element facilityName = (Element)entry.getElementsByTagName("facility_name").item(0);
-                        Element carParkID = (Element)entry.getElementsByTagName("id").item(0);
-                        Element latPositionElement = (Element)entry.getElementsByTagName("lat").item(0);
-                        Element longPositionElement = (Element)entry.getElementsByTagName("long").item(0);
-                        Element featuresElement = (Element)entry.getElementsByTagName("features").item(0);
-                        Element occupancyElement = (Element)featuresElement.getElementsByTagName("occupancy").item(0);
-                        Element occupancyPercentageElement = (Element)featuresElement.getElementsByTagName("occupancypercentage").item(0);
+                JSONArray carParks = new JSONArray(responseStrBuilder.toString());
+                for(int i = 0; i < carParks.length(); i++) {
+                    JSONObject carParkJSON = carParks.getJSONObject(i);
+                    String id = carParkJSON.getString("id");
+                    String name = carParkJSON.getString("facility_name");
+                    String latitude = carParkJSON.getString("lat");
+                    String longitude = carParkJSON.getString("long");
 
+                    Double latPosition = 0.0;
+                    Double longPosition = 0.0;
+                    Integer occupancy = 0;
+                    Double occupancyPercentage = 0.0;
 
-                        String name = facilityName.getFirstChild().getNodeValue();
-                        String id = carParkID.getFirstChild().getNodeValue();
-                        Double latPosition = 0.0;
-                        Double longPosition = 0.0;
-                        Integer occupancy = Integer.parseInt(occupancyElement.getFirstChild().getNodeValue());
-                        Double occupancyPercentage = Double.parseDouble(occupancyPercentageElement.getFirstChild().getNodeValue());
-
-
-                        try {
-                            latPosition = Double.parseDouble(latPositionElement.getFirstChild().getNodeValue());
-                            longPosition = Double.parseDouble(longPositionElement.getFirstChild().getNodeValue());
-                        } catch (NullPointerException e) {
-                            Log.d(TAG, "Location parsing exception for " + name, e);
-                        }
-
-                        Location location = new Location("dummyGPS");
-                        location.setLatitude(latPosition);
-                        location.setLongitude(longPosition);
-
-                        final CarPark carPark = new CarPark(name, location, id, occupancy, occupancyPercentage);
-                        addNewCarPark(carPark);
+                    try {
+                        latPosition = Double.parseDouble(latitude);
+                        longPosition = Double.parseDouble(longitude);
+                    } catch (NullPointerException e) {
+                        Log.d(TAG, "Location parsing exception for " + name, e);
                     }
-                }
 
+                    Location location = new Location("dummyGPS");
+                    location.setLatitude(latPosition);
+                    location.setLongitude(longPosition);
+
+                    final CarPark carPark = new CarPark(name, location, id, occupancy, occupancyPercentage);
+                    addNewCarPark(carPark);
+                }
             }
 
         } catch (MalformedURLException e) {
             Log.d(TAG, "MalformedURLException");
         } catch (IOException e) {
             Log.d(TAG, "IOException");
-        } catch (ParserConfigurationException e) {
-            Log.d(TAG, "Parser Configuration Exception");
-        } catch (SAXException e) {
-            Log.d(TAG, "SAX Exception");
+        } catch (JSONException e) {
+            Log.d(TAG, "JSONException");
         } finally {
         }
-        */
     }
 
     private void addNewCarPark(CarPark carPark) {
-
-        //mCarParkList.add(carPark);
-        //mAdapter.notifyDataSetChanged();
-
-
         ContentResolver cr = getContentResolver();
 
         // Construct a where clause to make sure we don't already have this carpark in the provider

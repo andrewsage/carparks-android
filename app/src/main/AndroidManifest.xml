@@ -17,11 +17,11 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <provider
-            android:name="com.xoverto.carparks.app.CarParkProvider"
+            android:name=".CarParkProvider"
             android:authorities="com.xoverto.carparkprovider" />
 
         <activity
-            android:name="com.xoverto.carparks.app.MainActivity"
+            android:name=".MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -32,7 +32,7 @@
         <activity
             android:name=".MapsActivity"
             android:label="@string/title_activity_maps"
-            android:parentActivityName="com.xoverto.carparks.app.MainActivity" >
+            android:parentActivityName=".MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.xoverto.carparks.app.MainActivity" />
@@ -46,25 +46,34 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name="com.xoverto.carparks.app.SettingsActivity"
+            android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:parentActivityName="com.xoverto.carparks.app.MainActivity" >
+            android:parentActivityName=".MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.xoverto.carparks.app.MainActivity" />
         </activity>
 
         <service
-            android:name="com.xoverto.carparks.app.CarParkUpdateService"
+            android:name=".CarParkUpdateService"
             android:enabled="true"
             android:exported="true" >
         </service>
 
-        <receiver android:name=".CarParkAlarmReceiver">
+        <receiver android:name=".CarParkAlarmReceiver" >
             <intent-filter>
                 <action android:name="com.xoverto.carparks.app.ACTION_REFRESH_CARPARK" />
             </intent-filter>
         </receiver>
+
+        <activity
+            android:name=".CarParkDetailsActivity"
+            android:label="@string/title_activity_car_park_details"
+            android:parentActivityName=".MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.xoverto.carparks.app.MainActivity" />
+        </activity>
     </application>
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
