@@ -7,10 +7,10 @@
     <string name="action_map">Map</string>
     <string name="carparks_feed">http://open311server.herokuapp.com/dev/v1/facilities/parking.xml</string>
     <string name="title_activity_maps">Map</string>
-
     <string name="str_rb_normal">Normal</string>
     <string name="str_rb_hybrid">Hybrid</string>
     <string name="str_rb_satellite">Satellite</string>
     <string name="str_rb_terrain">Terrain</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

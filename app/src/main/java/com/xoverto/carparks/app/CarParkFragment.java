@@ -1,52 +1,29 @@
 package com.xoverto.carparks.app;
 
 import android.app.Activity;
-import android.app.LoaderManager;
-import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.content.CursorLoader;
+import android.support.v4.content.CursorLoader;
 import android.content.Intent;
-import android.content.Loader;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.database.Cursor;
 import android.graphics.Color;
-import android.location.Location;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.os.Handler;
-import android.util.Log;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
-import android.widget.SimpleCursorAdapter;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
 import com.google.android.gms.maps.model.LatLng;
-import com.xoverto.carparks.app.dummy.DummyContent;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * A fragment representing a list of Items.

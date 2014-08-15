@@ -84,6 +84,9 @@ public class CarParkUpdateService extends IntentService {
     }
 
     public void refreshCarParks() {
+
+        // TODO: reinstate refreshCarParks
+/*
         // Get the XML
         URL url;
         try {
@@ -152,6 +155,7 @@ public class CarParkUpdateService extends IntentService {
             Log.d(TAG, "SAX Exception");
         } finally {
         }
+        */
     }
 
     private void addNewCarPark(CarPark carPark) {

@@ -43,7 +43,7 @@
     android:layout_height="match_parent"
     android:layout_below="@id/rg_views"
     android:id="@+id/map"
-    tools:context="com.xoverto.carparks.app.MapsActivity"
+    tools:context="com.xoverto.carparks.app.MapFragment"
     android:name="com.google.android.gms.maps.SupportMapFragment"/>
 
     </RelativeLayout>
